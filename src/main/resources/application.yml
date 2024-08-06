@@ -1,0 +1,25 @@
+server:
+  port: 8080
+
+spring:
+  jpa:      
+    show-sql: true
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        default-schema: public
+  datasource:
+    url: jdbc:postgresql://localhost:5432/mytask
+    username: postgres
+    password: root
+    driver-class-name: org.postgresql.Driver
+logging:
+  level:
+    org:
+      springframework:
+        security: TRACE
+
+#jwt:
+#  private-key-file: ${JWT_PRIVATE_KEY_FILE}
+#  public-key-file: ${JWT_PUBLIC_KEY_FILE}
