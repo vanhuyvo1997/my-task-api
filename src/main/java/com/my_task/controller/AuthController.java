@@ -1,7 +1,9 @@
 package com.my_task.controller;
 
+import java.io.IOException;
 import java.net.URI;
-import java.time.Instant;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 
 import org.apache.tomcat.websocket.AuthenticationException;
 import org.springframework.http.HttpStatus;
@@ -16,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.my_task.model.User;
 import com.my_task.service.UserRequest;
 import com.my_task.service.UserService;
-import com.my_task.utils.TokenUtils;
+import com.my_task.service.auth.AuthService;
 
 import lombok.AllArgsConstructor;
 
@@ -25,6 +27,7 @@ import lombok.AllArgsConstructor;
 @Controller
 public class AuthController {
 	private final UserService userService;
+	private final AuthService authService;
 	private final AuthenticationManager authenticationManager;
 	
 	@PostMapping("register")
@@ -33,19 +36,14 @@ public class AuthController {
 	}
 	
 	@PostMapping("login")
-	public ResponseEntity<?> login(@RequestBody LoginRequest request) throws AuthenticationException{
+	public ResponseEntity<?> login(@RequestBody LoginRequest request) throws AuthenticationException, NoSuchAlgorithmException, InvalidKeySpecException, IOException{
 		
 		UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(request.email(), request.password());
 		var authentication = authenticationManager.authenticate(token);
 		if(!authentication.isAuthenticated()) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Can not log in with " + request.email());
 		}
-		
-		User user = (User)authentication.getPrincipal();
-		Instant now = Instant.now();
-		String accessToken = TokenUtils.generateAccesToken(user, now);
-		String refreshToken  = TokenUtils.generateRefreshToken(user,now);
-		
-		return ResponseEntity.ok(LoginResponse.builder().refreshToken(refreshToken).accessToken(accessToken).build());
+		var user = (User) authentication.getPrincipal();
+		return ResponseEntity.ok(authService.generateToken(user));
 	}
 }

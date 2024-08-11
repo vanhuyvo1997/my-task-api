@@ -1,0 +1,12 @@
+{"properties": [
+  {
+    "name": "jwt.private-key",
+    "type": "java.lang.String",
+    "description": "Path to private key file"
+  },
+  {
+    "name": "jwt.public-key",
+    "type": "java.lang.String",
+    "description": "Path to public key file"
+  }
+]}
