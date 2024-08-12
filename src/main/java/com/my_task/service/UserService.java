@@ -1,5 +1,8 @@
 package com.my_task.service;
 
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -10,7 +13,7 @@ import lombok.AllArgsConstructor;
 
 @Service
 @AllArgsConstructor
-public class UserService {
+public class UserService implements UserDetailsService {
 	
 	private final UserRepository userRepository;
 	
@@ -25,6 +28,12 @@ public class UserService {
 		newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
 		var createdUser = userRepository.save(newUser);
 		return UserResponse.form(createdUser);
+	}
+
+	@Override
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		return userRepository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException(username + " not found"));
+		
 	}
 	
 	
