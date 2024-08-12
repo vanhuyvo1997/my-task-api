@@ -18,7 +18,8 @@ public class TokenUtils {
 	public static String generateAccesToken(User user, PrivateKey key, Instant now) throws NoSuchAlgorithmException, InvalidKeySpecException, IOException {
 		
 		var claims = new HashMap<String, String>();
-		claims.put("firName", user.getFirstName());
+		claims.put("id", user.getId());
+		claims.put("firstName", user.getFirstName());
 		claims.put("lastName", user.getLastName());
 		claims.put("role", user.getRole().name());
 		claims.put("type", "access");
