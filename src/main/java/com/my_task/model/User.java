@@ -49,7 +49,7 @@ public class User implements UserDetails {
 	@Enumerated(EnumType.STRING)
 	@Column(length = 10, nullable = false)
 	@Builder.Default
-	private Role role = Role.User;
+	private Role role = Role.USER;
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
