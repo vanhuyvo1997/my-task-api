@@ -2,10 +2,9 @@ package com.my_task.controller;
 
 import java.net.URI;
 
-import javax.security.sasl.AuthenticationException;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,17 +19,22 @@ import lombok.AllArgsConstructor;
 @RequestMapping("api/tasks")
 @AllArgsConstructor
 public class TaskController {
-	
+
 	private final TaskService taskService;
 
 	@PostMapping
-	public ResponseEntity<?> create(@RequestBody TaskRequest taskRequest) throws AuthenticationException{
+	public ResponseEntity<?> create(@RequestBody TaskRequest taskRequest) {
 		return ResponseEntity.created(URI.create("/api/tasks")).body(taskService.createTask(taskRequest));
 	}
-	
+
 	@GetMapping
-	public ResponseEntity<?> gettAll() throws AuthenticationException{
+	public ResponseEntity<?> gettAll() {
 		return ResponseEntity.of(taskService.getAll());
 	}
 	
+	@GetMapping("{id}")
+	public ResponseEntity<?> getById(@PathVariable Long id){
+		return ResponseEntity.of(taskService.findById(id));
+	}
+
 }

@@ -4,8 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import javax.security.sasl.AuthenticationException;
-
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -23,7 +22,7 @@ import lombok.AllArgsConstructor;
 public class TaskService {
 	private final TaskRepository taskRepository;
 
-	public TaskResponse createTask(TaskRequest taskRequest) throws AuthenticationException {
+	public TaskResponse createTask(TaskRequest taskRequest){
 		var owner = getOwner();
 		var newTask = Task.builder()
 				.name(taskRequest.name())
@@ -44,15 +43,20 @@ public class TaskService {
 		return Optional.empty();
 	}
 	
-	private User getOwner() throws AuthenticationException{
+	private User getOwner() {
 		var optOwner = getAuthenticatedUser()
 				.filter(user -> user.getAuthorities().contains(new SimpleGrantedAuthority(Role.USER.name())));
-		return optOwner.orElseThrow(() -> new AuthenticationException("Permission denied"));
+		return optOwner.orElseThrow(() -> new AccessDeniedException("Permission denied"));
 	}
 
-	public Optional<List<TaskResponse>> getAll() throws AuthenticationException {
+	public Optional<List<TaskResponse>> getAll( )  {
 		var owner = getOwner();
 		var result = taskRepository.findByOwnerId(owner.getId()).stream().map(TaskResponse::from).toList();
 		return Optional.of(result).filter(tasks -> tasks.size() > 0);
+	}
+
+	public Optional<TaskResponse> findById(Long id) {
+		var owner = getOwner();
+		return taskRepository.findByOwnerIdAndId(owner.getId(), id).map(TaskResponse::from);
 	}
 }
