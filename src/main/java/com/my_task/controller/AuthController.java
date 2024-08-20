@@ -16,9 +16,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.my_task.model.User;
-import com.my_task.service.UserRequest;
-import com.my_task.service.UserService;
 import com.my_task.service.auth.AuthService;
+import com.my_task.service.auth.LoginRequest;
+import com.my_task.service.user.UserRequest;
+import com.my_task.service.user.UserService;
 
 import lombok.AllArgsConstructor;
 
