@@ -1,4 +1,4 @@
-package com.my_task.service;
+package com.my_task.service.user;
 
 public class UserAlreadyExistedException extends RuntimeException{
 

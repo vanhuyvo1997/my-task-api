@@ -1,4 +1,4 @@
-package com.my_task.service;
+package com.my_task.service.user;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
