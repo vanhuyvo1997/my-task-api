@@ -1,6 +1,7 @@
 package com.my_task.controller;
 
 import java.net.URI;
+import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.my_task.service.task.TaskRequest;
@@ -28,8 +30,8 @@ public class TaskController {
 	}
 
 	@GetMapping
-	public ResponseEntity<?> gettAll() {
-		return ResponseEntity.of(taskService.getAll());
+	public ResponseEntity<?> gettAll(@RequestParam(required = false) List<String> sortProps, @RequestParam(required = false) String sortDirection) {
+		return ResponseEntity.of(taskService.getAll(sortProps, sortDirection));
 	}
 	
 	@GetMapping("{id}")

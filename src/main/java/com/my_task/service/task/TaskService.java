@@ -1,9 +1,12 @@
 package com.my_task.service.task;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -49,9 +52,14 @@ public class TaskService {
 		return optOwner.orElseThrow(() -> new AccessDeniedException("Permission denied"));
 	}
 
-	public Optional<List<TaskResponse>> getAll( )  {
+	public Optional<List<TaskResponse>> getAll(List<String> sortProps, String sortDirection)  {
+		Direction direction = Direction.fromOptionalString(sortDirection).orElse(Direction.DESC);
+		if(sortProps == null ||sortProps.size() == 0) {
+			sortProps = Arrays.asList("createdAt");
+		}
+		var sort = Sort.by(direction, sortProps.toArray(new String[sortProps.size()]));
 		var owner = getOwner();
-		var result = taskRepository.findByOwnerId(owner.getId()).stream().map(TaskResponse::from).toList();
+		var result = taskRepository.findByOwnerId(owner.getId(), sort).stream().map(TaskResponse::from).toList();
 		return Optional.of(result).filter(tasks -> tasks.size() > 0);
 	}
 
