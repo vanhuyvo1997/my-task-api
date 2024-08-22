@@ -1,4 +1,4 @@
-package com.my_task.service;
+package com.my_task.service.user;
 
 import com.my_task.model.User;
 

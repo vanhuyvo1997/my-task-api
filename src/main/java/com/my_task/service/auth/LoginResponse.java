@@ -1,4 +1,4 @@
-package com.my_task.controller;
+package com.my_task.service.auth;
 
 import lombok.Builder;
 

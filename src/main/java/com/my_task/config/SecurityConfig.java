@@ -1,5 +1,7 @@
 package com.my_task.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -11,17 +13,23 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import com.my_task.filter.BearerTokenFilter;
+import com.my_task.model.Role;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 	
+	@Autowired
+	private BearerTokenFilter bearerTokenFilter;
+	
 	@Bean
 	SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http.authorizeHttpRequests(authorize ->{			
-			authorize.requestMatchers("api/auth/*").permitAll()
-			.anyRequest().authenticated();
-			});
+			authorize.requestMatchers("/api/tasks/**").hasAuthority(Role.USER.name())
+			.anyRequest().permitAll();});
 		http.csrf(csrf->{
 			csrf.disable();
 		});
@@ -29,6 +37,8 @@ public class SecurityConfig {
 		http.sessionManagement(session -> {
 			session.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 		});
+		
+		http.addFilterBefore(bearerTokenFilter, UsernamePasswordAuthenticationFilter.class);
 		return http.build();
 	}
 	
@@ -42,6 +52,14 @@ public class SecurityConfig {
 		authenticationProvider.setPasswordEncoder(passwordEncoder);
 
 		return new ProviderManager(authenticationProvider);
+	}
+	
+	
+	@Bean
+	public FilterRegistrationBean<BearerTokenFilter> tenantFilterRegistration(BearerTokenFilter filter) {
+	    FilterRegistrationBean<BearerTokenFilter> registration = new FilterRegistrationBean<>(filter);
+	    registration.setEnabled(false);
+	    return registration;
 	}
 	
 }
