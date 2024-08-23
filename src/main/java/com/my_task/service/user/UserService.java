@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.my_task.model.User;
 import com.my_task.repository.UserRepository;
+import com.my_task.service.exception.ResourceAlreadyExistedException;
 
 import lombok.AllArgsConstructor;
 
@@ -21,7 +22,7 @@ public class UserService implements UserDetailsService {
 
 	public UserResponse create(UserRequest userRequest) {
 		if(userRepository.findByEmail(userRequest.email()).isPresent()) {
-			throw new UserAlreadyExistedException(userRequest.email() + " is existed.");
+			throw new ResourceAlreadyExistedException(userRequest.email() + " is existed.");
 		}
 		
 		User newUser = userRequest.toUser();
