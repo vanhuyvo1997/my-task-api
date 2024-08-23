@@ -5,7 +5,7 @@ spring:
   jpa:      
     show-sql: true
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     properties:
       hibernate:
         default-schema: public
@@ -18,7 +18,7 @@ logging:
   level:
     org:
       springframework:
-        security: TRACE
+        security: DEBUG
 
 jwt:
   private-key: ${JWT_PRIVATE_KEY_FILE}
