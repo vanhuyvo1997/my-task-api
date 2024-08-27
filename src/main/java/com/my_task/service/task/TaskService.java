@@ -17,6 +17,7 @@ import com.my_task.model.Task;
 import com.my_task.model.TaskStatus;
 import com.my_task.model.User;
 import com.my_task.repository.TaskRepository;
+import com.my_task.service.exception.ResourceNotFoundException;
 
 import lombok.AllArgsConstructor;
 
@@ -66,5 +67,12 @@ public class TaskService {
 	public Optional<TaskResponse> findById(Long id) {
 		var owner = getOwner();
 		return taskRepository.findByOwnerIdAndId(owner.getId(), id).map(TaskResponse::from);
+	}
+
+
+	public void delete(Long id) {
+		var owner = getOwner();
+		var task = taskRepository.findByOwnerIdAndId(owner.getId(), id).orElseThrow(()->new ResourceNotFoundException("Task id not found: " + id));
+		taskRepository.delete(task);
 	}
 }
