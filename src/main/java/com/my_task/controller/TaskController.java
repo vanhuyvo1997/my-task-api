@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,19 +32,25 @@ public class TaskController {
 	}
 
 	@GetMapping
-	public ResponseEntity<?> gettAll(@RequestParam(required = false) List<String> sortProps, @RequestParam(required = false) String sortDirection) {
+	public ResponseEntity<?> gettAll(@RequestParam(required = false) List<String> sortProps,
+			@RequestParam(required = false) String sortDirection) {
 		return ResponseEntity.of(taskService.getAll(sortProps, sortDirection));
 	}
-	
+
 	@GetMapping("{id}")
-	public ResponseEntity<?> getById(@PathVariable Long id){
+	public ResponseEntity<?> getById(@PathVariable Long id) {
 		return ResponseEntity.of(taskService.findById(id));
 	}
-	
+
 	@DeleteMapping("{id}")
-	public ResponseEntity<?> deleteById(@PathVariable Long id){
+	public ResponseEntity<?> deleteById(@PathVariable Long id) {
 		taskService.delete(id);
 		return ResponseEntity.noContent().build();
+	}
+
+	@PatchMapping("{id}/status")
+	public ResponseEntity<?> changeStatus(@PathVariable Long id, @RequestBody TaskRequest request) {
+		return ResponseEntity.ok(taskService.changeStatus(id, request.status()));
 	}
 
 }

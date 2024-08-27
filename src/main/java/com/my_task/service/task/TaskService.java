@@ -75,4 +75,23 @@ public class TaskService {
 		var task = taskRepository.findByOwnerIdAndId(owner.getId(), id).orElseThrow(()->new ResourceNotFoundException("Task id not found: " + id));
 		taskRepository.delete(task);
 	}
+
+
+	public TaskResponse changeStatus(Long id, TaskStatus nextStatus) {
+		var owner = getOwner();
+		var task = taskRepository.findByOwnerIdAndId(owner.getId(), id).orElseThrow(
+				() -> new ResourceNotFoundException("Not found task " + id + " for user " + owner.getId()));
+
+		if (task.getStatus() != nextStatus) {
+			var completedDate = nextStatus.equals(TaskStatus.COMPLETED) ? LocalDateTime.now() : null;
+			task.setCompletedAt(completedDate);
+			task.setStatus(nextStatus);
+			task = taskRepository.save(task);
+		} else if (nextStatus.equals(TaskStatus.COMPLETED)) {
+			task.setCompletedAt(LocalDateTime.now());
+			task = taskRepository.save(task);
+		}
+
+		return TaskResponse.from(task);
+	}
 }
