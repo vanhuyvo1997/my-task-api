@@ -79,8 +79,7 @@ public class TaskService {
 
 	public TaskResponse changeStatus(Long id, TaskStatus nextStatus) {
 		var owner = getOwner();
-		var task = taskRepository.findByOwnerIdAndId(owner.getId(), id).orElseThrow(
-				() -> new ResourceNotFoundException("Not found task " + id + " for user " + owner.getId()));
+		var task = getTaskByOwner(id, owner.getId());
 
 		if (task.getStatus() != nextStatus) {
 			var completedDate = nextStatus.equals(TaskStatus.COMPLETED) ? LocalDateTime.now() : null;
@@ -93,5 +92,45 @@ public class TaskService {
 		}
 
 		return TaskResponse.from(task);
+	}
+
+
+	public Object changeName(Long id, String name) {
+		var taskPartialUpdateRequest = new TaskRequest(name, null, null, null, null);
+		return updateTask(id, taskPartialUpdateRequest);
+	}
+
+
+	private Object updateTask(Long id, TaskRequest taskPartialUpdateRequest) {
+		var owner = getOwner();
+		var task = getTaskByOwner(id, owner.getId());
+		task = partialUpdate(task, taskPartialUpdateRequest);
+		return TaskResponse.from(taskRepository.save(task));
+	}
+
+	private Task partialUpdate(Task task, TaskRequest taskPartialUpdateRequest) {
+		if (taskPartialUpdateRequest.name() != null) {
+			task.setName(taskPartialUpdateRequest.name());
+		}
+
+		if (taskPartialUpdateRequest.completedAt() != null) {
+			task.setCompletedAt(taskPartialUpdateRequest.completedAt());
+		}
+
+		if (taskPartialUpdateRequest.createdAt() != null) {
+			task.setCreatedAt(taskPartialUpdateRequest.createdAt());
+		}
+
+		return task;
+	}
+	
+	public static void main(String[] args) {
+		System.out.println(Optional.empty().isPresent());
+		
+	}
+
+
+	private Task getTaskByOwner(Long id, String ownerId) {
+		return taskRepository.findByOwnerIdAndId(ownerId, id).orElseThrow(()-> new ResourceNotFoundException("Not found task " + id + " for user " + ownerId));
 	}
 }

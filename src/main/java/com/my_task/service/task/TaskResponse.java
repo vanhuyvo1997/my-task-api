@@ -8,13 +8,12 @@ import com.my_task.model.TaskStatus;
 import lombok.Builder;
 
 @Builder
-public record TaskResponse (Long id, String name, String ownerId, LocalDateTime createdAt, LocalDateTime completedAt, TaskStatus status){
+public record TaskResponse (Long id, String name, LocalDateTime createdAt, LocalDateTime completedAt, TaskStatus status){
 
 	public static TaskResponse from(Task task) {
 		return builder()
 				.id(task.getId())
 				.name(task.getName())
-				.ownerId(task.getOwner().getId())
 				.createdAt(task.getCreatedAt())
 				.completedAt(task.getCompletedAt())
 				.status(task.getStatus())
