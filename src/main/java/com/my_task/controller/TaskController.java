@@ -53,4 +53,9 @@ public class TaskController {
 		return ResponseEntity.ok(taskService.changeStatus(id, request.status()));
 	}
 
+	@PatchMapping("{id}/name")
+	public ResponseEntity<?> changeName(@PathVariable Long id, @RequestBody TaskRequest request) {
+		return ResponseEntity.ok(taskService.changeName(id, request.name()));
+	}
+
 }
