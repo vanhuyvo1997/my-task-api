@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.security.access.AccessDeniedException;
@@ -53,15 +54,22 @@ public class TaskService {
 		return optOwner.orElseThrow(() -> new AccessDeniedException("Permission denied"));
 	}
 
-	public Optional<List<TaskResponse>> getAll(List<String> sortProps, String sortDirection)  {
+	public Optional<List<TaskResponse>> getAll(List<String> sortProps, String sortDirection, String query)  {
 		Direction direction = Direction.fromOptionalString(sortDirection).orElse(Direction.DESC);
 		if(sortProps == null ||sortProps.size() == 0) {
 			sortProps = Arrays.asList("createdAt");
 		}
 		var sort = Sort.by(direction, sortProps.toArray(new String[sortProps.size()]));
 		var owner = getOwner();
-		var result = taskRepository.findByOwnerId(owner.getId(), sort).stream().map(TaskResponse::from).toList();
-		return Optional.of(result).filter(tasks -> tasks.size() > 0);
+		
+		List<Task> tasks;
+		if(Strings.isNotBlank(query)) {
+			tasks = taskRepository.findByOwnerIdAndNameContainingIgnoreCase(owner.getId(),  query, sort);
+		} else {			
+			tasks = taskRepository.findByOwnerId(owner.getId(), sort);
+		}
+		var tasksResponse = tasks.stream().map(TaskResponse::from).toList();
+		return Optional.of(tasksResponse).filter(trs -> trs.size() > 0);
 	}
 
 	public Optional<TaskResponse> findById(Long id) {

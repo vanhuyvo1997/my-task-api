@@ -33,8 +33,8 @@ public class TaskController {
 
 	@GetMapping
 	public ResponseEntity<?> gettAll(@RequestParam(required = false) List<String> sortProps,
-			@RequestParam(required = false) String sortDirection) {
-		return ResponseEntity.of(taskService.getAll(sortProps, sortDirection));
+			@RequestParam(required = false) String sortDirection, @RequestParam(required = false) String query) {
+		return ResponseEntity.of(taskService.getAll(sortProps, sortDirection, query));
 	}
 
 	@GetMapping("{id}")
