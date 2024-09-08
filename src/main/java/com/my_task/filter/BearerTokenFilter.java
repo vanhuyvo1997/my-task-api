@@ -2,6 +2,7 @@ package com.my_task.filter;
 
 import java.io.IOException;
 import java.security.KeyPair;
+import java.util.Optional;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -34,28 +35,33 @@ public class BearerTokenFilter extends OncePerRequestFilter {
 			throws ServletException, IOException {
 
 		String token = (String) request.getHeader("Authorization");
-		Jws<?> result = parseToken(token);
-		Claims claims = null;
-		if(result != null) claims = (Claims) result.getPayload();
 
-		if (claims != null) {
+		if (token == null) {
+			filterChain.doFilter(request, response);
+			return;
+		}
+
+		var optJws = parseToken(token);
+
+		if(optJws.isPresent()) {
+			Claims claims = optJws.get().getPayload();
 			String email = claims.getSubject();
 			var user = userService.loadUserByUsername(email);
 			Authentication authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 		}
+		
 		filterChain.doFilter(request, response);
 	}
 
-	private Jws<?> parseToken(String token) {
-		if (token == null)
-			return null;
+	private Optional<Jws<Claims>> parseToken(String token) {
+		if(token == null) return Optional.empty();
 		try {
 			token = token.replaceAll("Bearer", "").trim();
 			var parser = Jwts.parser().verifyWith(keypair.getPublic()).build();
-			return parser.parseSignedClaims(token);
+			return Optional.of(parser.parseSignedClaims(token));
 		} catch (JwtException ex) {
-			return null;
+			return Optional.empty();
 		}
 	}
 
