@@ -25,7 +25,6 @@ public class BearerTokenFilter extends OncePerRequestFilter {
 
 	private final KeyPair keypair;
 	private UserService userService;
-	
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -40,14 +39,14 @@ public class BearerTokenFilter extends OncePerRequestFilter {
 
 		var optJws = TokenUtils.parseToken(token, keypair.getPublic());
 
-		if(optJws.isPresent()) {
+		if (optJws.isPresent()) {
 			Claims claims = optJws.get().getPayload();
 			String email = claims.getSubject();
 			var user = userService.loadUserByUsername(email);
 			Authentication authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 		}
-		
+
 		filterChain.doFilter(request, response);
 	}
 

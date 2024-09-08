@@ -30,7 +30,8 @@ public class SecurityConfig {
 		http.authorizeHttpRequests(authorize ->{
 			authorize.requestMatchers("/api/tasks/**").hasAuthority(Role.USER.name())
 			.requestMatchers("/api/auth/refresh").authenticated()
-			.anyRequest().permitAll();});
+			.anyRequest().permitAll();
+		});
 		http.csrf(csrf->{
 			csrf.disable();
 		});

@@ -35,7 +35,7 @@ public class AuthService {
 	public LoginResponse refreshToken(String refreshToken) {
 		var optJws = TokenUtils.parseToken(refreshToken, keyPair.getPublic());
 		var claims = optJws.get().getPayload();
-		if(!claims.get("type").equals("refresh")) {
+		if (!claims.get("type").equals("refresh")) {
 			throw new AccessDeniedException("Invalid refresh token");
 		}
 		var securityContext = SecurityContextHolder.getContext();
