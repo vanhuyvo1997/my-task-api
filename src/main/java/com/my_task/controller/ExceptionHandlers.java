@@ -2,6 +2,7 @@ package com.my_task.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -19,6 +20,11 @@ public class ExceptionHandlers {
 	@ExceptionHandler({ ResourceNotFoundException.class })
 	public ResponseEntity<?> handleResourceNotFound(Exception e) {
 		return ResponseEntity.notFound().build();
+	}
+
+	@ExceptionHandler({ AccessDeniedException.class })
+	public ResponseEntity<?> handleAccessDeniedException(AccessDeniedException ex) {
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
 	}
 
 }

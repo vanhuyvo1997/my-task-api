@@ -3,14 +3,19 @@ package com.my_task.utils;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Optional;
 
 import com.my_task.model.User;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 
 public class TokenUtils {
@@ -46,6 +51,15 @@ public class TokenUtils {
 		return token;
 	}
 	
-
+	public static Optional<Jws<Claims>> parseToken(String token, PublicKey key) {
+		if(token == null) return Optional.empty();
+		try {
+			token = token.replaceAll("Bearer", "").trim();
+			var parser = Jwts.parser().verifyWith(key).build();
+			return Optional.of(parser.parseSignedClaims(token));
+		} catch (JwtException ex) {
+			return Optional.empty();
+		}
+	}
 
 }
