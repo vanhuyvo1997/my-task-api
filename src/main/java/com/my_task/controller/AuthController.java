@@ -17,7 +17,6 @@ import com.my_task.service.auth.LoginRequest;
 import com.my_task.service.user.UserRequest;
 import com.my_task.service.user.UserService;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 
 @RequestMapping("api/auth")
@@ -47,8 +46,9 @@ public class AuthController {
 	}
 
 	@PostMapping("refresh")
-	public ResponseEntity<?> refreshToken(HttpServletRequest request) {
-		String token = request.getHeader("Authorization").replace("Bearer", "").trim();
-		return ResponseEntity.ok(authService.refreshToken(token));
+	public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest rq) {
+		return ResponseEntity.ok(authService.refreshToken(rq.refreshToken));
 	}
+	
+	private record RefreshTokenRequest(String refreshToken) {};
 }

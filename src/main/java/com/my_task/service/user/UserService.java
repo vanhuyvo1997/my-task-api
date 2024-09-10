@@ -1,6 +1,5 @@
 package com.my_task.service.user;
 
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -32,11 +31,11 @@ public class UserService implements UserDetailsService {
 	}
 
 	@Override
-	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		return userRepository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException(username + " not found"));
-		
+	public User loadUserByUsername(String username) throws UsernameNotFoundException {
+		return userRepository.findByEmail(username)
+				.orElseThrow(() -> new UsernameNotFoundException(username + " not found"));
+
 	}
-	
 	
 	
 }

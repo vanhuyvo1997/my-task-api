@@ -39,8 +39,13 @@ public class BearerTokenFilter extends OncePerRequestFilter {
 
 		var optJws = TokenUtils.parseToken(token, keypair.getPublic());
 
-		if (optJws.isPresent()) {
-			Claims claims = optJws.get().getPayload();
+		if (!optJws.isPresent()) {
+			filterChain.doFilter(request, response);
+			return;
+		}
+
+		Claims claims = optJws.get().getPayload();
+		if (claims.get("type").equals("access")) {
 			String email = claims.getSubject();
 			var user = userService.loadUserByUsername(email);
 			Authentication authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
@@ -48,6 +53,7 @@ public class BearerTokenFilter extends OncePerRequestFilter {
 		}
 
 		filterChain.doFilter(request, response);
+
 	}
 
 }

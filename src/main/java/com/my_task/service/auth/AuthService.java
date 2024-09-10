@@ -7,10 +7,10 @@ import java.security.spec.InvalidKeySpecException;
 import java.time.Instant;
 
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.my_task.model.User;
+import com.my_task.service.user.UserService;
 import com.my_task.utils.TokenUtils;
 
 import lombok.AllArgsConstructor;
@@ -20,6 +20,7 @@ import lombok.AllArgsConstructor;
 public class AuthService {
 
 	private final KeyPair keyPair;
+	private final UserService userService;
 
 	public LoginResponse generateToken(User user) {
 		try {
@@ -34,13 +35,14 @@ public class AuthService {
 
 	public LoginResponse refreshToken(String refreshToken) {
 		var optJws = TokenUtils.parseToken(refreshToken, keyPair.getPublic());
+		if (!optJws.isPresent()) {
+			throw new AccessDeniedException("Invalid refresh token");
+		}
 		var claims = optJws.get().getPayload();
 		if (!claims.get("type").equals("refresh")) {
 			throw new AccessDeniedException("Invalid refresh token");
 		}
-		var securityContext = SecurityContextHolder.getContext();
-		var authentication = securityContext.getAuthentication();
-		var user = (User) authentication.getPrincipal();
+		var user = userService.loadUserByUsername(claims.getSubject());
 		return generateToken(user);
 	}
 }
