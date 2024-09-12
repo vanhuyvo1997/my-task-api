@@ -24,7 +24,9 @@ public class ExceptionHandlers {
 
 	@ExceptionHandler({ AccessDeniedException.class })
 	public ResponseEntity<?> handleAccessDeniedException(AccessDeniedException ex) {
-		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorResponse(ex.getMessage()));
 	}
+	
+	private record ErrorResponse(String error) {}
 
 }
