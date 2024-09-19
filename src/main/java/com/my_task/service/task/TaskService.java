@@ -10,7 +10,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.my_task.model.Role;
@@ -19,6 +18,7 @@ import com.my_task.model.TaskStatus;
 import com.my_task.model.User;
 import com.my_task.repository.TaskRepository;
 import com.my_task.service.exception.ResourceNotFoundException;
+import com.my_task.utils.UserUtils;
 
 import lombok.AllArgsConstructor;
 
@@ -38,18 +38,8 @@ public class TaskService {
 		return TaskResponse.from(taskRepository.save(newTask));
 	}
 	
-	
-	private Optional<User> getAuthenticatedUser(){
-		var authentication = SecurityContextHolder.getContext().getAuthentication();
-		var principal = authentication.getPrincipal();
-		if(principal instanceof User user) {
-			return Optional.of(user);
-		}
-		return Optional.empty();
-	}
-	
 	private User getOwner() {
-		var optOwner = getAuthenticatedUser()
+		var optOwner = UserUtils.getAuthenticatedUser()
 				.filter(user -> user.getAuthorities().contains(new SimpleGrantedAuthority(Role.USER.name())));
 		return optOwner.orElseThrow(() -> new AccessDeniedException("Permission denied"));
 	}
