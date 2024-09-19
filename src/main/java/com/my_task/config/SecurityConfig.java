@@ -29,7 +29,7 @@ public class SecurityConfig {
 	SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http.authorizeHttpRequests(authorize ->{
 			authorize.requestMatchers("/api/tasks/**").hasAuthority(Role.USER.name())
-			.requestMatchers("/api/users/**").authenticated()
+			.requestMatchers("/api/prifile/**").authenticated()
 			.anyRequest().permitAll();
 		});
 		http.csrf(csrf->{

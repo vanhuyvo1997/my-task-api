@@ -29,5 +29,5 @@ jwt:
   public-key: ${JWT_PUBLIC_KEY_FILE}
   
 upload: 
-  image-upload-directory: D:/images/avatar
+  image-upload-directory: /images/avatar
   max-image-upload-size: 1048576

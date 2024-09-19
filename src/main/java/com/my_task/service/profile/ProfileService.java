@@ -5,6 +5,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -57,5 +61,31 @@ public class ProfileService {
 		FileUtils.cleanUpDirectoryExcept(imageUploadDirPath, generatedFileName);
 
 		return new UpdateAvatarResponse(savedAvatarPath);
+	}
+
+	public ResponseEntity<?> getAvatar() {
+		var optUser = UserUtils.getAuthenticatedUser();
+		var user = optUser.orElseThrow(() -> new AccessDeniedException("Access denied"));
+
+		if (user.getAvatarUrl() == null) {
+			return ResponseEntity.notFound().build();
+		}
+
+		Path path = Path.of(user.getAvatarUrl());
+		if (Files.notExists(path)) {
+			return ResponseEntity.notFound().build();
+		}
+
+		try {
+			Resource resource;
+			resource = new UrlResource(path.toUri());
+			if (resource.exists() && resource.isReadable()) {
+				MediaType mediaType = MediaType.parseMediaType(Files.probeContentType(path));
+				return ResponseEntity.ok().contentType(mediaType).body(resource);
+			} else
+				throw new IOException();
+		} catch (IOException e) {
+			return ResponseEntity.notFound().build();
+		}
 	}
 }
