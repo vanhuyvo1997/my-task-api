@@ -1,3 +1,3 @@
 package com.my_task.service.profile;
 
-record UpdateAvatarResponse(String avatarUrl) {}
+record UpdateAvatarResponse(String avatarName) {}

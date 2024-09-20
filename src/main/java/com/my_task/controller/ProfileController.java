@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,19 +15,24 @@ import com.my_task.service.profile.ProfileService;
 import lombok.AllArgsConstructor;
 
 @RestController
-@RequestMapping("api/profile")
+@RequestMapping("api/profiles")
 @AllArgsConstructor
 public class ProfileController {
 
 	private final ProfileService profileService;
 
-	@PutMapping("avatar")
-	public ResponseEntity<?> updateAvatar(MultipartFile newAvatarFile) throws IOException {
-		return ResponseEntity.ok(profileService.updateAvatar(newAvatarFile));
+	@GetMapping
+	public ResponseEntity<?> getProfile() {
+		return ResponseEntity.ok(profileService.getUserProfile());
 	}
 
-	@GetMapping("avatar")
-	public ResponseEntity<?> getAvatar() {
-		return profileService.getAvatar();
+	@PutMapping("avatar")
+	public ResponseEntity<?> updateAvatar(MultipartFile avatarFile) throws IOException {
+		return ResponseEntity.ok(profileService.updateAvatar(avatarFile));
+	}
+
+	@GetMapping("avatar/{filename}")
+	public ResponseEntity<?> getAvatar(@PathVariable String filename) {
+		return ResponseEntity.ok(profileService.getAvatar(filename));
 	}
 }

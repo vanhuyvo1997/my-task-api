@@ -36,10 +36,15 @@ public class FileUtils {
 		return false;
 	}
 
-	public static String generateAvatarFileName(User user, MultipartFile newAvatarFile) {
+	public static String generateAvatarFileName(User user, MultipartFile newAvatarFile, String avoidedName) {
 		var splittedParts = newAvatarFile.getOriginalFilename().split(SPLIT_FILE_EXTESION_MARK);
 		var extension = "." + splittedParts[splittedParts.length - 1];
-		return user.getId() + extension;
+		var result = "";
+		do {			
+			var hash  = Math.round( Math.random() * 1000);
+			result = user.getId() + "_" + hash + extension;
+		} while(result.equals(avoidedName));
+		return result;
 	}
 	
 	public static void cleanUpDirectoryExcept(Path targetDirPath, String exceptedFileName) {
@@ -61,7 +66,7 @@ public class FileUtils {
 			if(file.getName().equals(exceptedFileName)) continue;
 			
 			var fileNameWithoutExtension = file.getName().split(SPLIT_FILE_EXTESION_MARK)[0];
-			if(fileNameWithoutExtension.equals(exceptedFileNameParts[0])) {
+			if(fileNameWithoutExtension.substring(0, 37).equals(exceptedFileNameParts[0].substring(0, 37))) {
 				file.delete();
 			}
 		}
