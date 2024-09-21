@@ -1,7 +1,10 @@
 package com.my_task.controller;
 
 import java.io.IOException;
+import java.nio.file.Files;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,6 +23,7 @@ import lombok.AllArgsConstructor;
 public class ProfileController {
 
 	private final ProfileService profileService;
+	
 
 	@GetMapping
 	public ResponseEntity<?> getProfile() {
@@ -32,7 +36,11 @@ public class ProfileController {
 	}
 
 	@GetMapping("avatar/{filename}")
-	public ResponseEntity<?> getAvatar(@PathVariable String filename) {
-		return ResponseEntity.ok(profileService.getAvatar(filename));
+	public ResponseEntity<?> getAvatar(@PathVariable String filename) throws IOException {
+		var resource = profileService.getAvatar(filename);
+		var mediaType =	MediaType.parseMediaType(Files.probeContentType(resource.getFile().toPath()));
+		return ResponseEntity.ok()
+				.header(HttpHeaders.CONTENT_DISPOSITION, "inline; file=/" + resource.getFilename() + "/")
+				.contentType(mediaType).body(resource); 
 	}
 }

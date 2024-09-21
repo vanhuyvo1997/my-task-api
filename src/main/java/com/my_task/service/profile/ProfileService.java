@@ -3,24 +3,21 @@ package com.my_task.service.profile;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.my_task.model.User;
 import com.my_task.repository.UserRepository;
 import com.my_task.service.exception.InvalidImageExcetption;
+import com.my_task.service.exception.ResourceNotFoundException;
 import com.my_task.utils.FileUtils;
 import com.my_task.utils.UserUtils;
-
-import lombok.Builder;
 
 @Service
 public class ProfileService {
@@ -38,7 +35,7 @@ public class ProfileService {
 		this.userRepository = userRepository;
 	}
 
-	public UpdateAvatarResponse updateAvatar(MultipartFile newAvatarFile) throws IOException {
+	public Map<String,String> updateAvatar(MultipartFile newAvatarFile) throws IOException {
 		if (!FileUtils.validateAvatarFile(newAvatarFile, maxImageUploadSize)) {
 			throw new InvalidImageExcetption("Uploaded file must has .png .jpg .jpeg");
 		}
@@ -50,62 +47,49 @@ public class ProfileService {
 			Files.createDirectories(imageUploadDirPath);
 		}
 
-		// Save file to avatat folder with the generated name
-		var oldFileName = Path.of(user.getAvatarUrl()).getFileName().toString();
+		// Save file to avatar folder with the generated name
+		var oldFileName = user.getAvatarUrl() != null ? Path.of(user.getAvatarUrl()).getFileName().toString() : "";
 		var generatedFileName = FileUtils.generateAvatarFileName(user, newAvatarFile, oldFileName);
-		var saveToFilePath = imageUploadDirPath.resolve(generatedFileName);
-		newAvatarFile.transferTo(saveToFilePath);
+		var destination = imageUploadDirPath.resolve(generatedFileName);
+		newAvatarFile.transferTo(destination);
 
 		// Save new avatar file path to database
-		String savedAvatarName = saveToFilePath.toFile().getName();
-		user.setAvatarUrl("/api/profiles/avatar/" + savedAvatarName);
+		var avatarUrl = "/api/profiles/avatar/" + generatedFileName;
+		user.setAvatarUrl(avatarUrl);
 		userRepository.save(user);
 
 		// Delete if duplicated file name with different extension
 		FileUtils.cleanUpDirectoryExcept(imageUploadDirPath, generatedFileName);
-
-		return new UpdateAvatarResponse(savedAvatarName);
+		
+		var response = new HashMap<String, String>();
+		response.put("avatarUrl", avatarUrl);
+		return response;
 	}
 
-	public ResponseEntity<?> getAvatar(String filename) {
-		var optUser = UserUtils.getAuthenticatedUser();
-		var user = optUser.orElseThrow(() -> new AccessDeniedException("Access denied"));
-
-		if (user.getAvatarUrl() == null) {
-			return ResponseEntity.notFound().build();
+	public Resource getAvatar(String filename) throws IOException {
+		var user = UserUtils.getAuthenticatedUser()
+				.orElseThrow(() -> new AccessDeniedException("Access denied"));
+		if (user.getAvatarUrl() == null || !user.getAvatarUrl().contains(filename)) {
+			throw new ResourceNotFoundException("Not found file " + filename);
 		}
-
-		if (!user.getAvatarUrl().contains(filename)) {
-			return ResponseEntity.notFound().build();
-		}
-
-		try {
-			Resource resource;
-			Path filePath = Path.of(imageUploadDirectory, filename).normalize();
-			resource = new UrlResource(filePath.toUri());
-			if (resource.exists() && resource.isReadable()) {
-				MediaType mediaType = MediaType.parseMediaType(Files.probeContentType(filePath));
-				return ResponseEntity.ok()
-						.header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
-						.contentType(mediaType).body(resource);
-			} else {
-				throw new IOException();
-			}
-		} catch (IOException e) {
-			return ResponseEntity.internalServerError().build();
+		Path filePath = Path.of(imageUploadDirectory, filename).normalize();
+		return getResource(filePath);
+	}
+	
+	private Resource  getResource(Path filePath) throws IOException {
+		Resource resource;
+		resource = new UrlResource(filePath.toUri());
+		if (resource.exists() && resource.isReadable()) {
+			return resource;
+		} else {
+			throw new IOException();
 		}
 	}
 
-	public Object getUserProfile() {
+	public ProfileResponse getUserProfile() {
 		var user = UserUtils.getAuthenticatedUser().orElseThrow(() -> new AccessDeniedException("Access denied"));
 		return ProfileResponse.from(user);
 	}
 
-	@Builder
-	private record ProfileResponse(String firstName, String lastName, String email, String role, String avatarUrl) {
-		public static ProfileResponse from(User user) {
-			return builder().firstName(user.getFirstName()).lastName(user.getLastName()).email(user.getEmail())
-					.role(user.getRole().name()).avatarUrl(user.getAvatarUrl()).build();
-		}
-	}
+	
 }
