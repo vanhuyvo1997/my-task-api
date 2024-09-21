@@ -50,6 +50,9 @@ public class User implements UserDetails {
 	@Column(length = 10, nullable = false)
 	@Builder.Default
 	private Role role = Role.USER;
+	
+	@Column(length = 256, nullable = true)
+	private String avatarUrl;
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
