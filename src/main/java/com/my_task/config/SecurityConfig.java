@@ -21,30 +21,28 @@ import com.my_task.model.Role;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-	
+
 	@Autowired
 	private BearerTokenFilter bearerTokenFilter;
-	
+
 	@Bean
 	SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-		http.authorizeHttpRequests(authorize ->{
+		http.authorizeHttpRequests(authorize -> {
 			authorize.requestMatchers("/api/tasks/**").hasAuthority(Role.USER.name())
-			.requestMatchers("/api/prifile/**").authenticated()
-			.anyRequest().permitAll();
+					.requestMatchers("/api/users/**").hasAuthority(Role.ADMIN.name())
+					.requestMatchers("/api/prifile/**").authenticated()
+					.anyRequest().permitAll();
 		});
-		http.csrf(csrf->{
-			csrf.disable();
-		});
-		
+		http.csrf(csrf -> csrf.disable());
+
 		http.sessionManagement(session -> {
 			session.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 		});
-		
+
 		http.addFilterBefore(bearerTokenFilter, UsernamePasswordAuthenticationFilter.class);
 		return http.build();
 	}
-	
-	
+
 	@Bean
 	AuthenticationManager authenticationManager(
 			UserDetailsService userDetailsService,
@@ -55,13 +53,12 @@ public class SecurityConfig {
 
 		return new ProviderManager(authenticationProvider);
 	}
-	
-	
+
 	@Bean
 	public FilterRegistrationBean<BearerTokenFilter> tenantFilterRegistration(BearerTokenFilter filter) {
-	    FilterRegistrationBean<BearerTokenFilter> registration = new FilterRegistrationBean<>(filter);
-	    registration.setEnabled(false);
-	    return registration;
+		FilterRegistrationBean<BearerTokenFilter> registration = new FilterRegistrationBean<>(filter);
+		registration.setEnabled(false);
+		return registration;
 	}
-	
+
 }

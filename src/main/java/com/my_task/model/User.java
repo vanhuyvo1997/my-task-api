@@ -32,27 +32,30 @@ public class User implements UserDetails {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
-	private String Id;
-	
+	private String id;
+
 	@Column(nullable = false, unique = true)
 	private String email;
-	
+
 	@Column(nullable = false)
 	private String password;
-	
+
 	@Column(length = 32, nullable = false)
 	private String firstName;
-	
+
 	@Column(length = 64, nullable = false)
 	private String lastName;
-	
+
 	@Enumerated(EnumType.STRING)
 	@Column(length = 10, nullable = false)
 	@Builder.Default
 	private Role role = Role.USER;
-	
+
 	@Column(length = 256, nullable = true)
 	private String avatarUrl;
+
+	@Column(nullable = false)
+	private boolean enabled;
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -63,5 +66,5 @@ public class User implements UserDetails {
 	public String getUsername() {
 		return email;
 	}
-	
+
 }
