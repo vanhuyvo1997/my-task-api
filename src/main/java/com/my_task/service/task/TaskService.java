@@ -27,7 +27,7 @@ import lombok.AllArgsConstructor;
 public class TaskService {
 	private final TaskRepository taskRepository;
 
-	public TaskResponse createTask(TaskRequest taskRequest){
+	public TaskResponse createTask(TaskRequest taskRequest) {
 		var owner = getOwner();
 		var newTask = Task.builder()
 				.name(taskRequest.name())
@@ -37,25 +37,25 @@ public class TaskService {
 				.build();
 		return TaskResponse.from(taskRepository.save(newTask));
 	}
-	
+
 	private User getOwner() {
 		var optOwner = UserUtils.getAuthenticatedUser()
 				.filter(user -> user.getAuthorities().contains(new SimpleGrantedAuthority(Role.USER.name())));
 		return optOwner.orElseThrow(() -> new AccessDeniedException("Permission denied"));
 	}
 
-	public Optional<List<TaskResponse>> getAll(List<String> sortProps, String sortDirection, String query)  {
+	public Optional<List<TaskResponse>> getAll(List<String> sortProps, String sortDirection, String query) {
 		Direction direction = Direction.fromOptionalString(sortDirection).orElse(Direction.DESC);
-		if(sortProps == null ||sortProps.size() == 0) {
+		if (sortProps == null || sortProps.size() == 0) {
 			sortProps = Arrays.asList("createdAt");
 		}
 		var sort = Sort.by(direction, sortProps.toArray(new String[sortProps.size()]));
 		var owner = getOwner();
-		
+
 		List<Task> tasks;
-		if(Strings.isNotBlank(query)) {
-			tasks = taskRepository.findByOwnerIdAndNameContainingIgnoreCase(owner.getId(),  query, sort);
-		} else {			
+		if (Strings.isNotBlank(query)) {
+			tasks = taskRepository.findByOwnerIdAndNameContainingIgnoreCase(owner.getId(), query, sort);
+		} else {
 			tasks = taskRepository.findByOwnerId(owner.getId(), sort);
 		}
 		var tasksResponse = tasks.stream().map(TaskResponse::from).toList();
@@ -67,13 +67,12 @@ public class TaskService {
 		return taskRepository.findByOwnerIdAndId(owner.getId(), id).map(TaskResponse::from);
 	}
 
-
 	public void delete(Long id) {
 		var owner = getOwner();
-		var task = taskRepository.findByOwnerIdAndId(owner.getId(), id).orElseThrow(()->new ResourceNotFoundException("Task id not found: " + id));
+		var task = taskRepository.findByOwnerIdAndId(owner.getId(), id)
+				.orElseThrow(() -> new ResourceNotFoundException("Task id not found: " + id));
 		taskRepository.delete(task);
 	}
-
 
 	public TaskResponse changeStatus(Long id, TaskStatus nextStatus) {
 		var owner = getOwner();
@@ -92,12 +91,10 @@ public class TaskService {
 		return TaskResponse.from(task);
 	}
 
-
 	public Object changeName(Long id, String name) {
 		var taskPartialUpdateRequest = new TaskRequest(name, null, null, null, null);
 		return updateTask(id, taskPartialUpdateRequest);
 	}
-
 
 	private Object updateTask(Long id, TaskRequest taskPartialUpdateRequest) {
 		var owner = getOwner();
@@ -121,14 +118,9 @@ public class TaskService {
 
 		return task;
 	}
-	
-	public static void main(String[] args) {
-		System.out.println(Optional.empty().isPresent());
-		
-	}
-
 
 	private Task getTaskByOwner(Long id, String ownerId) {
-		return taskRepository.findByOwnerIdAndId(ownerId, id).orElseThrow(()-> new ResourceNotFoundException("Not found task " + id + " for user " + ownerId));
+		return taskRepository.findByOwnerIdAndId(ownerId, id)
+				.orElseThrow(() -> new ResourceNotFoundException("Not found task " + id + " for user " + ownerId));
 	}
 }
