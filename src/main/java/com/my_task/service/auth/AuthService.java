@@ -1,11 +1,7 @@
 package com.my_task.service.auth;
 
-import java.io.IOException;
 import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 import java.time.Instant;
-
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -23,14 +19,10 @@ public class AuthService {
 	private final UserService userService;
 
 	public LoginResponse generateToken(User user) {
-		try {
-			Instant now = Instant.now();
-			String accessToken = TokenUtils.generateAccesToken(user, keyPair.getPrivate(), now);
-			String refreshToken = TokenUtils.generateRefreshToken(user, keyPair.getPrivate(), now);
-			return LoginResponse.builder().refreshToken(refreshToken).accessToken(accessToken).build();
-		} catch (NoSuchAlgorithmException | InvalidKeySpecException | IOException e) {
-			throw new FailToGenerateTokenException("Something went wrong when trying to generate token");
-		}
+		Instant now = Instant.now();
+		String accessToken = TokenUtils.generateAccesToken(user, keyPair.getPrivate(), now);
+		String refreshToken = TokenUtils.generateRefreshToken(user, keyPair.getPrivate(), now);
+		return LoginResponse.builder().refreshToken(refreshToken).accessToken(accessToken).build();
 	}
 
 	public LoginResponse refreshToken(String refreshToken) {

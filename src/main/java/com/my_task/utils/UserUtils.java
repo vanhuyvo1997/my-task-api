@@ -7,6 +7,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import com.my_task.model.User;
 
 public class UserUtils {
+
+	private UserUtils() {
+		throw new IllegalStateException("Utility class");
+	}
+
 	public static Optional<User> getAuthenticatedUser() {
 		var authentication = SecurityContextHolder.getContext().getAuthentication();
 		var principal = authentication.getPrincipal();

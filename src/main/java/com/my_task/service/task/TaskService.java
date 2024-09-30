@@ -46,7 +46,7 @@ public class TaskService {
 
 	public Optional<List<TaskResponse>> getAll(List<String> sortProps, String sortDirection, String query) {
 		Direction direction = Direction.fromOptionalString(sortDirection).orElse(Direction.DESC);
-		if (sortProps == null || sortProps.size() == 0) {
+		if (sortProps == null || sortProps.isEmpty()) {
 			sortProps = Arrays.asList("createdAt");
 		}
 		var sort = Sort.by(direction, sortProps.toArray(new String[sortProps.size()]));
@@ -59,7 +59,7 @@ public class TaskService {
 			tasks = taskRepository.findByOwnerId(owner.getId(), sort);
 		}
 		var tasksResponse = tasks.stream().map(TaskResponse::from).toList();
-		return Optional.of(tasksResponse).filter(trs -> trs.size() > 0);
+		return Optional.of(tasksResponse).filter(trs -> !trs.isEmpty());
 	}
 
 	public Optional<TaskResponse> findById(Long id) {
