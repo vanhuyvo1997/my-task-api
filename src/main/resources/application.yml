@@ -6,7 +6,7 @@ spring:
     multipart:
       max-file-size: 5MB
       max-request-size: 6MB
-  jpa:      
+  jpa:
     show-sql: true
     hibernate:
       ddl-auto: update
@@ -23,11 +23,11 @@ logging:
     org:
       springframework:
         security: DEBUG
-        
+
 jwt:
   private-key: ${JWT_PRIVATE_KEY_FILE}
   public-key: ${JWT_PUBLIC_KEY_FILE}
-  
-upload: 
+
+upload:
   image-upload-directory: /images/avatar
   max-image-upload-size: 1048576

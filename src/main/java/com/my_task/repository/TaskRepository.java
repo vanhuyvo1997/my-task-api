@@ -11,9 +11,9 @@ import com.my_task.model.Task;
 public interface TaskRepository extends JpaRepository<Task, Long> {
 
 	List<Task> findByOwnerId(String id, Sort sort);
-	
+
 	Optional<Task> findByOwnerIdAndId(String ownerId, Long id);
 
-	List<Task> findByOwnerIdAndNameContainingIgnoreCase(String id, String query,  Sort sort);
+	List<Task> findByOwnerIdAndNameContainingIgnoreCase(String id, String query, Sort sort);
 
 }
