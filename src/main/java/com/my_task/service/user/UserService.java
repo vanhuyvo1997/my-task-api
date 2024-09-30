@@ -1,18 +1,10 @@
 package com.my_task.service.user;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import javax.print.attribute.standard.PageRanges;
-
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.domain.Sort.Order;
-import org.springframework.data.domain.Sort.TypedSort;
-import org.springframework.http.ProblemDetail;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -25,8 +17,6 @@ import com.my_task.model.User;
 import com.my_task.repository.UserRepository;
 import com.my_task.service.exception.ResourceAlreadyExistedException;
 import com.my_task.service.exception.ResourceNotFoundException;
-import com.my_task.utils.UserUtils;
-
 import lombok.AllArgsConstructor;
 
 @Service
@@ -58,7 +48,19 @@ public class UserService implements UserDetailsService {
 	public Object getUsers(String query, int pageSize, int pageNum, String sortDir) {
 		Sort sort = Sort.by(Direction.fromString(sortDir), "firstName", "lastName", "email");
 		PageRequest pageRequest = PageRequest.of(pageNum, pageSize, sort);
-		return userRepository.findAll(pageRequest).stream().map(UserResponse::form).toList();
+
+		var userPage = userRepository.findBySearchQuery(query, pageRequest);
+
+		var content = userPage.getContent().stream().map(UserResponse::form).toList();
+		var totalPages = userPage.getTotalPages();
+		var currentPage = userPage.getNumber();
+		var totalElements = userPage.getTotalElements();
+
+		return new UsersPageResponse(content, totalPages, currentPage, totalElements);
+	}
+
+	private record UsersPageResponse(List<UserResponse> content, int totalPages, int currentPage, long totalElements) {
+
 	}
 
 	private UserResponse changeStatus(String userId, boolean newStatus) {

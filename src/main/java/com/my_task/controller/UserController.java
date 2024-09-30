@@ -4,7 +4,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.my_task.service.user.UserRequest;
 import com.my_task.service.user.UserService;
 
 import lombok.AllArgsConstructor;
@@ -23,11 +22,11 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<?> getUser(
-            @RequestParam String query,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "") String query,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "0") int pageNum,
             @RequestParam(defaultValue = "asc") String sortDir) {
-        return ResponseEntity.ok(userService.getUsers(query, size, page, sortDir));
+        return ResponseEntity.ok(userService.getUsers(query, pageSize, pageNum, sortDir));
     }
 
     @PutMapping("{id}/enabled")

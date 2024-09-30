@@ -19,7 +19,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity(name = "`User`")
+@Entity(name = "TaskUser")
 @Data
 @Builder
 @AllArgsConstructor
