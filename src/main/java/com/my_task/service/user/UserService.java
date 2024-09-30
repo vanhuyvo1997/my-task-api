@@ -2,6 +2,7 @@ package com.my_task.service.user;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -49,7 +50,12 @@ public class UserService implements UserDetailsService {
 		Sort sort = Sort.by(Direction.fromString(sortDir), "firstName", "lastName", "email");
 		PageRequest pageRequest = PageRequest.of(pageNum, pageSize, sort);
 
-		var userPage = userRepository.findBySearchQuery(query, pageRequest);
+		Page<User> userPage;
+		if (query.isBlank()) {
+			userPage = userRepository.findAll(pageRequest);
+		} else {
+			userPage = userRepository.findBySearchQuery(query, pageRequest);
+		}
 
 		var content = userPage.getContent().stream().map(UserResponse::form).toList();
 		var totalPages = userPage.getTotalPages();
