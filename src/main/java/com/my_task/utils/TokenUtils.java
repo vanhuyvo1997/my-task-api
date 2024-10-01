@@ -1,10 +1,7 @@
 package com.my_task.utils;
 
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.spec.InvalidKeySpecException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -20,8 +17,12 @@ import io.jsonwebtoken.Jwts;
 
 public class TokenUtils {
 
-	public static String generateAccesToken(User user, PrivateKey key, Instant now) throws NoSuchAlgorithmException, InvalidKeySpecException, IOException {
-		
+	private TokenUtils() {
+		throw new IllegalStateException("Utility class");
+	}
+
+	public static String generateAccesToken(User user, PrivateKey key, Instant now) {
+
 		var claims = new HashMap<String, String>();
 		claims.put("id", user.getId());
 		claims.put("firstName", user.getFirstName());
@@ -29,18 +30,17 @@ public class TokenUtils {
 		claims.put("role", user.getRole().name());
 		claims.put("type", "access");
 
-		var token = Jwts.builder()
+		return Jwts.builder()
 				.subject(user.getEmail())
 				.issuedAt(Date.from(now))
 				.expiration(Date.from(now.plus(7, ChronoUnit.DAYS)))
 				.claims(claims)
 				.signWith(key)
 				.compact();
-		return token;
 	}
 
-	public static String generateRefreshToken(User user, PrivateKey key, Instant now) throws NoSuchAlgorithmException, InvalidKeySpecException, IOException {
-		var token = Jwts
+	public static String generateRefreshToken(User user, PrivateKey key, Instant now) {
+		return Jwts
 				.builder()
 				.subject(user.getEmail())
 				.issuedAt(Date.from(now))
@@ -48,13 +48,13 @@ public class TokenUtils {
 				.claim("type", "refresh")
 				.signWith(key)
 				.compact();
-		return token;
 	}
-	
+
 	public static Optional<Jws<Claims>> parseToken(String token, PublicKey key) {
-		if(token == null) return Optional.empty();
+		if (token == null)
+			return Optional.empty();
 		try {
-			token = token.replaceAll("Bearer", "").trim();
+			token = token.replace("Bearer", "").trim();
 			var parser = Jwts.parser().verifyWith(key).build();
 			return Optional.of(parser.parseSignedClaims(token));
 		} catch (JwtException ex) {

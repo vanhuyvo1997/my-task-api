@@ -26,18 +26,18 @@ import lombok.Setter;
 public class Task {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long Id;
-	
+	private Long id;
+
 	@Column(nullable = false, length = 255)
 	private String name;
-	
+
 	private LocalDateTime createdAt;
-		
+
 	private LocalDateTime completedAt;
 
 	@Enumerated(EnumType.STRING)
 	private TaskStatus status;
-	
+
 	@ManyToOne
 	@JoinColumn(name = "user_id")
 	private User owner;
