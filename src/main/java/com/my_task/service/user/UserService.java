@@ -89,5 +89,4 @@ public class UserService implements UserDetailsService {
 	public UserResponse disabled(String id) {
 		return changeStatus(id, false);
 	}
-
 }

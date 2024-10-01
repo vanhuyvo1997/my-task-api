@@ -17,4 +17,6 @@ public interface UserRepository extends JpaRepository<User, String> {
 	@Query("select u from TaskUser u where u.firstName ilike %:query% or u.lastName ilike %:query% or email ilike %:query%")
 	Page<User> findBySearchQuery(@Param("query") String query, Pageable pageable);
 
+	@Query("select count(u) as totalUsers, count(case when u.enabled = true then 1 end) as enabledUsers, count(case when u.enabled = false then 1 end) as disabledUsers from TaskUser u")
+	UserStatistics getUserStatistics();
 }
