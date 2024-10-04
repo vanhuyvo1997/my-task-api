@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 
 import com.my_task.model.Role;
 import com.my_task.model.User;
+import com.my_task.repository.TaskRepository;
+import com.my_task.repository.TaskStatistics;
 import com.my_task.repository.UserRepository;
 import com.my_task.service.exception.ResourceAlreadyExistedException;
 import com.my_task.service.exception.ResourceNotFoundException;
@@ -25,6 +27,8 @@ import lombok.AllArgsConstructor;
 public class UserService implements UserDetailsService {
 
 	private final UserRepository userRepository;
+
+	private final TaskRepository taskRepository;
 
 	private final PasswordEncoder passwordEncoder;
 
@@ -57,7 +61,19 @@ public class UserService implements UserDetailsService {
 			userPage = userRepository.findBySearchQuery(query, pageRequest);
 		}
 
-		var content = userPage.getContent().stream().map(UserResponse::form).toList();
+		var content = userPage.getContent().stream().map(user -> {
+			TaskStatistics statistics = taskRepository.getTaskStatisticsByOwnerId(user.getId());
+			return UserResponse.builder()
+					.id(user.getId())
+					.email(user.getEmail())
+					.firstName(user.getFirstName())
+					.lastName(user.getLastName())
+					.enabled(user.isEnabled())
+					.numOfCompleted(statistics.getCompletedTasks())
+					.numOfTodo(statistics.getTodoTasks())
+					.totalTasks(statistics.getTotalTasks())
+					.build();
+		}).toList();
 		var totalPages = userPage.getTotalPages();
 		var currentPage = userPage.getNumber();
 		var totalElements = userPage.getTotalElements();
