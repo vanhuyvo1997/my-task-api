@@ -20,4 +20,6 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 	@Query("select count(t) as totalTasks, count(case when t.status=COMPLETED then 1 end) as completedTasks, count(case when t.status=TO_DO then 1 end) as todoTasks from Task t")
 	TaskStatistics getTaskStatistics();
 
+	@Query("select count(t) as totalTasks, count(case when t.status=TO_DO then 1 end) as todoTasks, count(case when t.status=COMPLETED then 1 end) as completedTasks from Task t where t.owner.id=:ownerId")
+	TaskStatistics getTaskStatisticsByOwnerId(String ownerId);
 }
