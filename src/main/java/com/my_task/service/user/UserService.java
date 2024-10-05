@@ -68,6 +68,7 @@ public class UserService implements UserDetailsService {
 					.email(user.getEmail())
 					.firstName(user.getFirstName())
 					.lastName(user.getLastName())
+					.avatarUrl(user.getAvatarUrl())
 					.enabled(user.isEnabled())
 					.numOfCompleted(statistics.getCompletedTasks())
 					.numOfTodo(statistics.getTodoTasks())
