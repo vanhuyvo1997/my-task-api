@@ -2,8 +2,10 @@ package com.my_task.utils;
 
 import java.util.Optional;
 
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import com.my_task.model.Role;
 import com.my_task.model.User;
 
 public class UserUtils {
@@ -19,5 +21,11 @@ public class UserUtils {
 			return Optional.of(user);
 		}
 		return Optional.empty();
+	}
+
+	public static boolean isAdmin(User user) {
+		if (user == null)
+			return false;
+		return user.getAuthorities().contains(new SimpleGrantedAuthority(Role.ADMIN.name()));
 	}
 }

@@ -35,7 +35,7 @@ public class ProfileService {
 		this.userRepository = userRepository;
 	}
 
-	public Map<String,String> updateAvatar(MultipartFile newAvatarFile) throws IOException {
+	public Map<String, String> updateAvatar(MultipartFile newAvatarFile) throws IOException {
 		if (!FileUtils.validateAvatarFile(newAvatarFile, maxImageUploadSize)) {
 			throw new InvalidImageExcetption("Uploaded file must has .png .jpg .jpeg");
 		}
@@ -60,7 +60,7 @@ public class ProfileService {
 
 		// Delete if duplicated file name with different extension
 		FileUtils.cleanUpDirectoryExcept(imageUploadDirPath, generatedFileName);
-		
+
 		var response = new HashMap<String, String>();
 		response.put("avatarUrl", avatarUrl);
 		return response;
@@ -69,14 +69,14 @@ public class ProfileService {
 	public Resource getAvatar(String filename) throws IOException {
 		var user = UserUtils.getAuthenticatedUser()
 				.orElseThrow(() -> new AccessDeniedException("Access denied"));
-		if (user.getAvatarUrl() == null || !user.getAvatarUrl().contains(filename)) {
+		if (!UserUtils.isAdmin(user) && (user.getAvatarUrl() == null || !user.getAvatarUrl().contains(filename))) {
 			throw new ResourceNotFoundException("Not found file " + filename);
 		}
 		Path filePath = Path.of(imageUploadDirectory, filename).normalize();
 		return getResource(filePath);
 	}
-	
-	private Resource  getResource(Path filePath) throws IOException {
+
+	private Resource getResource(Path filePath) throws IOException {
 		Resource resource;
 		resource = new UrlResource(filePath.toUri());
 		if (resource.exists() && resource.isReadable()) {
@@ -91,5 +91,4 @@ public class ProfileService {
 		return ProfileResponse.from(user);
 	}
 
-	
 }
