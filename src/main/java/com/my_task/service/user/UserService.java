@@ -1,6 +1,9 @@
 package com.my_task.service.user;
 
 import java.util.List;
+import java.util.function.Predicate;
+
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -49,14 +52,18 @@ public class UserService implements UserDetailsService {
 
 	}
 
-	public Object getUsers(String query, int pageSize, int pageNum, String sortDir) {
+	public UsersPageResponse getUsers(String query, int pageSize, int pageNum, String sortDir) {
 		Sort sort = Sort.by(Direction.fromString(sortDir), "firstName", "lastName", "email");
 		PageRequest pageRequest = PageRequest.of(pageNum, pageSize, sort);
 
 		Page<User> userPage;
-		userPage = userRepository.findBySearchQuery(query, pageRequest);
+		if (Strings.isNotBlank(query)) {
+			userPage = userRepository.findBySearchQuery(query, pageRequest);
+		} else {
+			userPage = userRepository.findAll(pageRequest);
+		}
 
-		var content = userPage.getContent().stream().map(user -> {
+		var content = userPage.getContent().stream().filter(Predicate.not(UserUtils::isAdmin)).map(user -> {
 			TaskStatistics statistics = taskRepository.getTaskStatisticsByOwnerId(user.getId());
 			return UserResponse.builder()
 					.id(user.getId())
@@ -70,6 +77,7 @@ public class UserService implements UserDetailsService {
 					.totalTasks(statistics.getTotalTasks())
 					.build();
 		}).toList();
+
 		var totalPages = userPage.getTotalPages();
 		var currentPage = userPage.getNumber();
 		var totalElements = userPage.getTotalElements();
