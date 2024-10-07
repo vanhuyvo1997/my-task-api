@@ -63,7 +63,7 @@ public class UserService implements UserDetailsService {
 			userPage = userRepository.findAll(pageRequest);
 		}
 
-		var content = userPage.getContent().stream().filter(Predicate.not(UserUtils::isAdmin)).map(user -> {
+		var content = userPage.getContent().stream().map(user -> {
 			TaskStatistics statistics = taskRepository.getTaskStatisticsByOwnerId(user.getId());
 			return UserResponse.builder()
 					.id(user.getId())

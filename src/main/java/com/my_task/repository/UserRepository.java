@@ -14,8 +14,11 @@ public interface UserRepository extends JpaRepository<User, String> {
 
 	Optional<User> findByEmail(String email);
 
-	@Query("select u from TaskUser u where CONCAT(u.firstName,' ', u.lastName) ilike %:query% or CONCAT(u.lastName,' ', u.firstName) ilike %:query% or u.email ilike %:query%")
+	@Query("select u from TaskUser u where (CONCAT(u.firstName,' ', u.lastName) ilike %:query% or CONCAT(u.lastName,' ', u.firstName) ilike %:query% or u.email ilike %:query%) and u.role=USER")
 	Page<User> findBySearchQuery(@Param("query") String query, Pageable pageable);
+
+	@Query("select u from TaskUser u where u.role=USER")
+	Page<User> findAll(Pageable pageable);
 
 	@Query("select count(u) as totalUsers, count(case when u.enabled = true then 1 end) as enabledUsers, count(case when u.enabled = false then 1 end) as disabledUsers from TaskUser u")
 	UserStatistics getUserStatistics();
