@@ -19,6 +19,6 @@ public class StatisticService {
         return new StatisticsResponse(userRepository.getUserStatistics(), taskRepository.getTaskStatistics());
     }
 
-    private record StatisticsResponse(UserStatistics UserStatistics, TaskStatistics taskStatistics) {
+    private record StatisticsResponse(UserStatistics userStatistics, TaskStatistics taskStatistics) {
     }
 }

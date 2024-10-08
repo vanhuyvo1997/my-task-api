@@ -52,6 +52,21 @@ public class UserService implements UserDetailsService {
 
 	}
 
+	public List<UserResponse> getTopAtiveUsers(int topNum) {
+		return userRepository.getTopActiveUser(topNum)
+				.stream()
+				.map(e -> UserResponse.builder()
+						.id(e.getId())
+						.firstName(e.getFirstName())
+						.lastName(e.getLastName())
+						.avatarUrl(e.getAvatarUrl())
+						.totalTasks(e.getTotalTasks())
+						.numOfTodo(e.getNumOfTodoTasks())
+						.numOfCompleted(e.getNumOfCompletedTasks())
+						.build())
+				.toList();
+	}
+
 	public UsersPageResponse getUsers(String query, int pageSize, int pageNum, String sortDir) {
 		Sort sort = Sort.by(Direction.fromString(sortDir), "firstName", "lastName", "email");
 		PageRequest pageRequest = PageRequest.of(pageNum, pageSize, sort);

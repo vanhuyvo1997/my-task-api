@@ -38,4 +38,10 @@ public class UserController {
     public ResponseEntity<?> disabled(@PathVariable String id) {
         return ResponseEntity.ok(userService.disabled(id));
     }
+
+    @GetMapping("top")
+    public ResponseEntity<?> getTop5(@RequestParam(required = false, defaultValue = "1") int topNum) {
+        return ResponseEntity.ok().body(userService.getTopAtiveUsers(topNum));
+    }
+
 }

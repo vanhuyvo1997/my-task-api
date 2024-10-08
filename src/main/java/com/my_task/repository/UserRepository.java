@@ -1,5 +1,6 @@
 package com.my_task.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -22,4 +23,17 @@ public interface UserRepository extends JpaRepository<User, String> {
 
 	@Query("select count(u) as totalUsers, count(case when u.enabled = true then 1 end) as enabledUsers, count(case when u.enabled = false then 1 end) as disabledUsers from TaskUser u")
 	UserStatistics getUserStatistics();
+
+	@Query("""
+			select u.id as id, u.firstName as firstName, u.lastName as lastName,
+			u.avatarUrl as avatarUrl,
+			count(t.id) as totalTasks,
+			count(case when t.status=COMPLETED then 1 end) as numOfCompletedTasks,
+			count(case when t.status=TO_DO then 1 end) as numOfTodoTasks
+			 from TaskUser u join Task t on u.id=t.owner.id
+			 where u.enabled=true
+			 group by u.id
+			 order by totalTasks, numOfCompletedTasks, numOfTodoTasks desc
+			 fetch first :topNum rows only""")
+	List<UserDetailsData> getTopActiveUser(int topNum);
 }

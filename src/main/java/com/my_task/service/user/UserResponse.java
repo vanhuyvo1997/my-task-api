@@ -6,7 +6,7 @@ import lombok.Builder;
 
 @Builder
 public record UserResponse(String id, String firstName, String lastName, String email, String avatarUrl,
-		boolean enabled, long numOfTodo,
+		Boolean enabled, long numOfTodo,
 		long numOfCompleted, long totalTasks) {
 	public static UserResponse form(User user) {
 		return UserResponse.builder().id(user.getId()).email(user.getEmail()).firstName(user.getFirstName())
