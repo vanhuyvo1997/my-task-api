@@ -15,25 +15,38 @@ public interface UserRepository extends JpaRepository<User, String> {
 
 	Optional<User> findByEmail(String email);
 
-	@Query("select u from TaskUser u where (CONCAT(u.firstName,' ', u.lastName) ilike %:query% or CONCAT(u.lastName,' ', u.firstName) ilike %:query% or u.email ilike %:query%) and u.role=USER")
-	Page<User> findBySearchQuery(@Param("query") String query, Pageable pageable);
+	@Query("""
+			select u.id id, u.firstName firstName, u.lastName lastName, u.email email, u.avatarUrl avatarUrl, u.enabled enabled, u.role role,
+			count(t.id) totalTasks,
+			count(case when t.status=COMPLETED then 1 end) numOfCompletedTasks,
+			count(case when t.status=TO_DO then 1 end) numOfTodoTasks
+			from TaskUser u left join Task t on t.owner.id = u.id
+			where (CONCAT(u.firstName,' ', u.lastName) ilike %:query%
+			or CONCAT(u.lastName,' ', u.firstName) ilike %:query%
+			or u.email ilike %:query%) and u.role=USER group by u.id""")
+	Page<UserDetailsData> findBySearchQuery(@Param("query") String query, Pageable pageable);
 
-	@Query("select u from TaskUser u where u.role=USER")
-	Page<User> findAll(Pageable pageable);
+	@Query("""
+			select u.id id, u.firstName firstName, u.lastName lastName, u.email email, u.avatarUrl avatarUrl, u.enabled enabled, u.role role,
+			count(t.id) totalTasks,
+			count(case when t.status=COMPLETED then 1 end) numOfCompletedTasks,
+			count(case when t.status=TO_DO then 1 end) numOfTodoTasks
+			from TaskUser u left join Task t on t.owner.id = u.id
+			where u.role=USER
+			group by u.id""")
+	Page<UserDetailsData> findAllWithStatistics(Pageable pageable);
 
 	@Query("select count(u) as totalUsers, count(case when u.enabled = true then 1 end) as enabledUsers, count(case when u.enabled = false then 1 end) as disabledUsers from TaskUser u")
 	UserStatistics getUserStatistics();
 
 	@Query("""
-			select u.id as id, u.firstName as firstName, u.lastName as lastName,
-			u.avatarUrl as avatarUrl,
-			count(t.id) as totalTasks,
-			count(case when t.status=COMPLETED then 1 end) as numOfCompletedTasks,
+			select u.id as id, u.firstName as firstName, u.lastName as lastName, u.avatarUrl as avatarUrl,
+			count(t.id) as totalTasks, count(case when t.status=COMPLETED then 1 end) as numOfCompletedTasks,
 			count(case when t.status=TO_DO then 1 end) as numOfTodoTasks
-			 from TaskUser u join Task t on u.id=t.owner.id
-			 where u.enabled=true
-			 group by u.id
-			 order by totalTasks, numOfCompletedTasks, numOfTodoTasks desc
-			 fetch first :topNum rows only""")
+			from TaskUser u join Task t on u.id=t.owner.id
+			where u.enabled=true
+			group by u.id
+			order by totalTasks, numOfCompletedTasks, numOfTodoTasks desc
+			fetch first :topNum rows only""")
 	List<UserDetailsData> getTopActiveUser(int topNum);
 }

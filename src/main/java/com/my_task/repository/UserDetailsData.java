@@ -13,9 +13,9 @@ public interface UserDetailsData {
 
     Boolean getEnabled();
 
-    Integer getTotalTasks();
+    int getTotalTasks();
 
-    Integer getNumOfTodoTasks();
+    int getNumOfTodoTasks();
 
-    Integer getNumOfCompletedTasks();
+    int getNumOfCompletedTasks();
 }

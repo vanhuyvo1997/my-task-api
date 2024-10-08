@@ -1,7 +1,6 @@
 package com.my_task.service.user;
 
 import java.util.List;
-import java.util.function.Predicate;
 
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.data.domain.Page;
@@ -15,8 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.my_task.model.User;
-import com.my_task.repository.TaskRepository;
-import com.my_task.repository.TaskStatistics;
+import com.my_task.repository.UserDetailsData;
 import com.my_task.repository.UserRepository;
 import com.my_task.service.exception.ResourceAlreadyExistedException;
 import com.my_task.service.exception.ResourceNotFoundException;
@@ -29,8 +27,6 @@ import lombok.AllArgsConstructor;
 public class UserService implements UserDetailsService {
 
 	private final UserRepository userRepository;
-
-	private final TaskRepository taskRepository;
 
 	private final PasswordEncoder passwordEncoder;
 
@@ -71,28 +67,22 @@ public class UserService implements UserDetailsService {
 		Sort sort = Sort.by(Direction.fromString(sortDir), "firstName", "lastName", "email");
 		PageRequest pageRequest = PageRequest.of(pageNum, pageSize, sort);
 
-		Page<User> userPage;
+		Page<UserDetailsData> userPage;
 		if (Strings.isNotBlank(query)) {
 			userPage = userRepository.findBySearchQuery(query, pageRequest);
 		} else {
-			userPage = userRepository.findAll(pageRequest);
+			userPage = userRepository.findAllWithStatistics(pageRequest);
 		}
 
-		var content = userPage.getContent().stream().map(user -> {
-			TaskStatistics statistics = taskRepository.getTaskStatisticsByOwnerId(user.getId());
-			return UserResponse.builder()
-					.id(user.getId())
-					.email(user.getEmail())
-					.firstName(user.getFirstName())
-					.lastName(user.getLastName())
-					.avatarUrl(user.getAvatarUrl())
-					.enabled(user.isEnabled())
-					.numOfCompleted(statistics.getCompletedTasks())
-					.numOfTodo(statistics.getTodoTasks())
-					.totalTasks(statistics.getTotalTasks())
-					.build();
-		}).toList();
-
+		var content = userPage.getContent().stream().map(data -> UserResponse.builder()
+				.id(data.getId()).firstName(data.getFirstName())
+				.lastName(data.getLastName())
+				.email(data.getEmail())
+				.enabled(data.getEnabled())
+				.avatarUrl(data.getAvatarUrl())
+				.totalTasks(data.getTotalTasks())
+				.numOfCompleted(data.getNumOfCompletedTasks())
+				.numOfTodo(data.getNumOfTodoTasks()).build()).toList();
 		var totalPages = userPage.getTotalPages();
 		var currentPage = userPage.getNumber();
 		var totalElements = userPage.getTotalElements();
@@ -100,7 +90,8 @@ public class UserService implements UserDetailsService {
 		return new UsersPageResponse(content, totalPages, currentPage, totalElements);
 	}
 
-	private record UsersPageResponse(List<UserResponse> content, int totalPages, int currentPage, long totalElements) {
+	private record UsersPageResponse(List<UserResponse> content, Integer totalPages, Integer currentPage,
+			Long totalElements) {
 
 	}
 
