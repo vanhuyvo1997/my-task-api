@@ -46,7 +46,7 @@ public interface UserRepository extends JpaRepository<User, String> {
 			from TaskUser u join Task t on u.id=t.owner.id
 			where u.enabled=true
 			group by u.id
-			order by totalTasks, numOfCompletedTasks, numOfTodoTasks desc
+			order by totalTasks desc, numOfCompletedTasks desc, numOfTodoTasks desc
 			fetch first :topNum rows only""")
 	List<UserDetailsData> getTopActiveUser(int topNum);
 }
