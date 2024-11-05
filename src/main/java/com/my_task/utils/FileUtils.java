@@ -12,6 +12,9 @@ import com.my_task.model.User;
 
 public class FileUtils {
 
+	private FileUtils() {
+	}
+
 	public static final Pattern AVATAR_IMAGE_NAME_PATTERN = Pattern.compile("^([a-zA-Z0-9_-]+)\\.([a-zA-Z0-9_-]+)$");
 	public static final String SPLIT_FILE_EXTESION_MARK = "\\.";
 

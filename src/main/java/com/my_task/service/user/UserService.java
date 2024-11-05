@@ -37,6 +37,7 @@ public class UserService implements UserDetailsService {
 
 		User newUser = userRequest.toUser();
 		newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
+		newUser.setEnabled(true);
 		var createdUser = userRepository.save(newUser);
 		return UserResponse.form(createdUser);
 	}

@@ -41,4 +41,9 @@ public class Task {
 	@ManyToOne
 	@JoinColumn(name = "user_id")
 	private User owner;
+
+	@Column(nullable = false)
+	@Builder.Default
+	@Enumerated(EnumType.STRING)
+	private Priority priority = Priority.MEDIUM;
 }
