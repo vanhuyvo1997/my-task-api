@@ -34,6 +34,7 @@ public class TaskService {
 				.createdAt(LocalDateTime.now())
 				.owner(owner)
 				.status(TaskStatus.TO_DO)
+				.priority(taskRequest.priority())
 				.build();
 		return TaskResponse.from(taskRepository.save(newTask));
 	}
@@ -92,7 +93,7 @@ public class TaskService {
 	}
 
 	public Object changeName(Long id, String name) {
-		var taskPartialUpdateRequest = new TaskRequest(name, null, null, null, null);
+		var taskPartialUpdateRequest = new TaskRequest(name, null, null, null, null, null);
 		return updateTask(id, taskPartialUpdateRequest);
 	}
 
