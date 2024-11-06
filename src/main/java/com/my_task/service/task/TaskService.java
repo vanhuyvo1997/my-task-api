@@ -12,6 +12,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
+import com.my_task.model.Priority;
 import com.my_task.model.Role;
 import com.my_task.model.Task;
 import com.my_task.model.TaskStatus;
@@ -92,12 +93,7 @@ public class TaskService {
 		return TaskResponse.from(task);
 	}
 
-	public Object changeName(Long id, String name) {
-		var taskPartialUpdateRequest = new TaskRequest(name, null, null, null, null, null);
-		return updateTask(id, taskPartialUpdateRequest);
-	}
-
-	private Object updateTask(Long id, TaskRequest taskPartialUpdateRequest) {
+	public TaskResponse updateTask(Long id, TaskRequest taskPartialUpdateRequest) {
 		var owner = getOwner();
 		var task = getTaskByOwner(id, owner.getId());
 		task = partialUpdate(task, taskPartialUpdateRequest);
@@ -115,6 +111,10 @@ public class TaskService {
 
 		if (taskPartialUpdateRequest.createdAt() != null) {
 			task.setCreatedAt(taskPartialUpdateRequest.createdAt());
+		}
+
+		if (taskPartialUpdateRequest.priority() != null) {
+			task.setPriority(taskPartialUpdateRequest.priority());
 		}
 
 		return task;
