@@ -4,14 +4,13 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
-
 import com.my_task.model.Priority;
 import com.my_task.model.Role;
 import com.my_task.model.Task;
@@ -46,20 +45,22 @@ public class TaskService {
 		return optOwner.orElseThrow(() -> new AccessDeniedException("Permission denied"));
 	}
 
-	public Optional<List<TaskResponse>> getAll(List<String> sortProps, String sortDirection, String query) {
+	public Optional<List<TaskResponse>> getAll(List<String> sortProps, String sortDirection, String query,
+			Priority priority) {
 		Direction direction = Direction.fromOptionalString(sortDirection).orElse(Direction.DESC);
 		if (sortProps == null || sortProps.isEmpty()) {
 			sortProps = Arrays.asList("createdAt");
 		}
 		var sort = Sort.by(direction, sortProps.toArray(new String[sortProps.size()]));
 		var owner = getOwner();
+		query = query == null ? "" : query;
+		Set<Priority> priorities = priority == null ? Set.of(Priority.values()) : Set.of(priority);
 
 		List<Task> tasks;
-		if (Strings.isNotBlank(query)) {
-			tasks = taskRepository.findByOwnerIdAndNameContainingIgnoreCase(owner.getId(), query, sort);
-		} else {
-			tasks = taskRepository.findByOwnerId(owner.getId(), sort);
-		}
+		tasks = taskRepository.findByOwnerIdAndPriorityInAndNameContainingIgnoreCase(owner.getId(),
+				priorities,
+				query,
+				sort);
 		var tasksResponse = tasks.stream().map(TaskResponse::from).toList();
 		return Optional.of(tasksResponse).filter(trs -> !trs.isEmpty());
 	}

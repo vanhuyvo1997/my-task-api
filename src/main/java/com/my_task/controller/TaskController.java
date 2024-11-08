@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.my_task.model.Priority;
 import com.my_task.service.task.TaskRequest;
 import com.my_task.service.task.TaskService;
 
@@ -34,8 +35,9 @@ public class TaskController {
 
 	@GetMapping
 	public ResponseEntity<?> gettAll(@RequestParam(required = false) List<String> sortProps,
-			@RequestParam(required = false) String sortDirection, @RequestParam(required = false) String query) {
-		return ResponseEntity.of(taskService.getAll(sortProps, sortDirection, query));
+			@RequestParam(required = false) String sortDirection, @RequestParam(required = false) String query,
+			@RequestParam(required = false) Priority priority) {
+		return ResponseEntity.of(taskService.getAll(sortProps, sortDirection, query, priority));
 	}
 
 	@GetMapping("{id}")
